@@ -1,4 +1,4 @@
-#  Real-Time ASL Temporal Translator 
+# Real-Time ASL Temporal Translator
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange)
@@ -24,7 +24,7 @@ The entire pipeline runs locally on edge compute (CPU/Standard GPU) without rely
 3. **Deep Learning Brain (LSTM):** A Long Short-Term Memory (LSTM) network processes the sequence, retaining memory of the movement arc to predict the correct sign.
 4. **Real-Time Inference:** The highest-confidence prediction is overlaid directly onto the live OpenCV video feed.
 
-## 🛠️ Tech Stack
+##  Tech Stack
 * **Language:** Python
 * **Computer Vision:** OpenCV, MediaPipe
 * **Deep Learning:** TensorFlow / Keras (LSTM architecture)
@@ -36,3 +36,37 @@ The entire pipeline runs locally on edge compute (CPU/Standard GPU) without rely
 ```bash
 git clone [https://github.com/](https://github.com/)[YOUR-USERNAME]/real-time-asl.git
 cd real-time-asl
+
+2. Install dependencies
+It is highly recommended to use a virtual environment.
+
+Bash
+pip install -r requirements.txt
+
+3. Run the live inference app
+Bash
+python app.py
+(Note: Ensure your webcam is connected and not being used by another application like Zoom.)
+
+Dataset & Preprocessing (WLASL)
+Unlike basic tutorials that rely on highly controlled webcam recordings, this model is trained on the WLASL (Word-Level American Sign Language) Dataset, the largest video dataset for ASL recognition.
+
+Handling this real-world data required building a robust preprocessing pipeline:
+
+JSON Parsing: Extracted video mappings and gloss (word) labels from WLASL_v0.3.json.
+
+Batch Feature Extraction: Iterated through thousands of raw .mp4 files, applying Google MediaPipe to extract spatial hand landmarks (x, y, z).
+
+Temporal Padding & Masking: Handled variable-length videos by padding sequences to a fixed frame length (e.g., 30 frames) to maintain tensor shapes for the LSTM.
+
+Generalization: Training on multiple signers across diverse lighting conditions and backgrounds ensures the model does not overfit to a single user's environment.
+
+ Future Improvements
+[ ] Expand the vocabulary to 50+ common phrases.
+
+[ ] Implement a dynamic thresholding system to prevent false positives when hands are resting.
+
+[ ] Port the TensorFlow model to TensorFlow Lite for deployment on a Raspberry Pi / Edge device.
+
+ Connect
+Chukwuneta Emmanuel Chidubem Aspiring Machine Learning Engineer | emzy45cool@gmail.co,
