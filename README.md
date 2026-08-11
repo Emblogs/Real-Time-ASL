@@ -1,72 +1,121 @@
-# Real-Time ASL Temporal Translator
+# Real-Time ASL Translator
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![Python](https://img.shields.io/badge/Python-3.13-blue)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange)
 ![OpenCV](https://img.shields.io/badge/OpenCV-4.x-green)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-> An end-to-end edge AI pipeline that translates American Sign Language (ASL) into text in real-time using spatial-temporal neural networks.
+> An edge AI pipeline that recognizes American Sign Language (ASL) signs in real time from a webcam feed, using MediaPipe hand tracking and an LSTM neural network.
 
-##  Live Demo
+## Live Demo
 
 <p align="center">
   <img src="https://via.placeholder.com/800x400.png?text=Live+Webcam+Inference+GIF+Goes+Here" alt="ASL Live Demo">
 </p>
 
-##  Overview
-Standard computer vision models struggle with sign language because signs are not static images—they are movements over time. This project solves that by bridging **Computer Vision (MediaPipe/OpenCV)** for spatial feature extraction with **Sequential Deep Learning (LSTMs)** to map temporal patterns to English words.
+## Overview
 
-The entire pipeline runs locally on edge compute (CPU/Standard GPU) without relying on paid APIs or cloud inference.
+Sign language recognition is a *temporal* problem, not a static image classification one — the same handshape can mean different things depending on how it moves over time. This project bridges **computer vision** (MediaPipe hand landmark tracking) with **sequential deep learning** (an LSTM network) to recognize signs from motion, not single frames.
 
-##  Architecture & Data Pipeline
-1. **Feature Extraction (Spatial):** OpenCV captures the live video feed. Google MediaPipe extracts 21 3D hand landmarks (x, y, z coordinates) per frame.
-2. **Sequence Windowing (Temporal):** The data pipeline captures a rolling buffer of 30 consecutive frames, converting the physical movement into a mathematical tensor of shape `(30, 126)` for two hands.
-3. **Deep Learning Brain (LSTM):** A Long Short-Term Memory (LSTM) network processes the sequence, retaining memory of the movement arc to predict the correct sign.
-4. **Real-Time Inference:** The highest-confidence prediction is overlaid directly onto the live OpenCV video feed.
+The entire pipeline runs locally on CPU, with no paid APIs or cloud inference required.
 
-##  Tech Stack
-* **Language:** Python
-* **Computer Vision:** OpenCV, MediaPipe
-* **Deep Learning:** TensorFlow / Keras (LSTM architecture)
-* **Data Processing:** NumPy, Scikit-Learn, Matplotlib
+## Current Status
 
-##  How to Run Locally
+This is a working prototype covering **5 signs**: Hello, Thank You, Please, Yes, No.
+
+- Trained on a small dataset (~41 real examples from the WLASL dataset, expanded to ~205 via data augmentation)
+- Validation accuracy around 90% on held-out data — though with such a small dataset, this number should be taken as a promising signal rather than a guarantee of real-world accuracy
+- Tracks a single hand at a time
+- Not yet tested extensively across different lighting conditions, backgrounds, or signers beyond the original developer
+
+Expanding vocabulary and dataset size is the clear next step (see **Future Improvements** below).
+
+## Architecture & Data Pipeline
+
+1. **Feature Extraction (Spatial):** OpenCV captures the live video feed. MediaPipe's HandLandmarker (Tasks API) extracts 21 3D hand landmarks (x, y, z) per frame from a single hand.
+2. **Sequence Windowing (Temporal):** A rolling buffer holds the most recent 30 frames, forming a tensor of shape `(30, 63)` — 30 frames × 21 landmarks × 3 coordinates.
+3. **Deep Learning Brain (LSTM):** A stacked LSTM network processes the sequence, learning the motion pattern rather than just a single pose, to classify which sign it matches.
+4. **Real-Time Inference:** The highest-confidence prediction is overlaid on the live OpenCV video feed, with a confidence threshold to avoid flickering between guesses.
+
+## Tech Stack
+
+* **Language:** Python 3.13
+* **Computer Vision:** OpenCV, MediaPipe (Tasks API)
+* **Deep Learning:** TensorFlow / Keras (LSTM architecture), trained in Google Colab
+* **Data Processing:** NumPy, Scikit-learn (train/test split)
+* **Dataset:** [WLASL (Word-Level American Sign Language)](https://github.com/dxli94/WLASL)
+
+## Project Structure
+
+```
+real-time-asl/
+├── phase1_webcam.py              # Webcam capture test (Phase 1)
+├── phase1_hand_landmarks.py      # Webcam + hand landmark overlay (Phase 1)
+├── phase2_extract_from_wlasl.py  # Extracts landmarks from WLASL videos into training data
+├── phase4_live_inference.py      # Live webcam sign recognition (the main app)
+├── requirements.txt
+├── hand_landmarker.task          # MediaPipe hand detection model (see setup below)
+├── asl_model.h5                  # Trained LSTM model (see setup below)
+└── notebooks/
+    └── train_model.ipynb         # Colab notebook: data prep + LSTM training
+```
+
+## How to Run Locally
 
 ### 1. Clone the repository
+
 ```bash
-git clone [https://github.com/](https://github.com/)[YOUR-USERNAME]/real-time-asl.git
+git clone https://github.com/YOUR-USERNAME/real-time-asl.git
 cd real-time-asl
+```
 
-2. Install dependencies
-It is highly recommended to use a virtual environment.
+### 2. Set up a virtual environment and install dependencies
 
-Bash
+```bash
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
+```
 
-3. Run the live inference app
-Bash
-python app.py
-(Note: Ensure your webcam is connected and not being used by another application like Zoom.)
+### 3. Download the required model files
 
-Dataset & Preprocessing (WLASL)
-Unlike basic tutorials that rely on highly controlled webcam recordings, this model is trained on the WLASL (Word-Level American Sign Language) Dataset, the largest video dataset for ASL recognition.
+These aren't included in the repo (kept out via `.gitignore` since they're binary/regenerable):
 
-Handling this real-world data required building a robust preprocessing pipeline:
+- **`hand_landmarker.task`** — MediaPipe's hand detection model. Download from:
+  `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task`
+  Place it in the project root.
+- **`asl_model.h5`** — the trained sign-classification model. Either train it yourself using `notebooks/train_model.ipynb`, or place your own trained copy in the project root.
 
-JSON Parsing: Extracted video mappings and gloss (word) labels from WLASL_v0.3.json.
+### 4. Run the live inference app
 
-Batch Feature Extraction: Iterated through thousands of raw .mp4 files, applying Google MediaPipe to extract spatial hand landmarks (x, y, z).
+```bash
+python phase4_live_inference.py
+```
 
-Temporal Padding & Masking: Handled variable-length videos by padding sequences to a fixed frame length (e.g., 30 frames) to maintain tensor shapes for the LSTM.
+Press **`q`** (with the video window focused) to quit.
 
-Generalization: Training on multiple signers across diverse lighting conditions and backgrounds ensures the model does not overfit to a single user's environment.
+*(Make sure your webcam isn't already in use by another app, like Zoom or Teams.)*
 
- Future Improvements
-[ ] Expand the vocabulary to 50+ common phrases.
+## Dataset & Preprocessing (WLASL)
 
-[ ] Implement a dynamic thresholding system to prevent false positives when hands are resting.
+Rather than recording a small set of self-made webcam clips, this project sources training data from **WLASL**, a large real-world video dataset for ASL recognition. Working with it required a proper data pipeline rather than a simple recording script:
 
-[ ] Port the TensorFlow model to TensorFlow Lite for deployment on a Raspberry Pi / Edge device.
+- **JSON parsing:** matched target words ("glosses") to their video examples using `WLASL_v0_3.json`.
+- **Missing-data handling:** cross-checked against `missing.txt` to skip broken/unavailable video links rather than crashing on them.
+- **Batch feature extraction:** ran MediaPipe hand tracking across every valid video file, frame by frame.
+- **Sequence standardization:** videos vary in length, so each one is resampled to a fixed 30-frame sequence (via evenly spaced sampling) to keep tensor shapes consistent for the LSTM.
+- **Data augmentation:** given the small number of real examples per word, additional synthetic training examples were generated using coordinate jitter and slight time-warping.
 
- Connect
-Chukwuneta Emmanuel Chidubem Aspiring Machine Learning Engineer | emzy45cool@gmail.co,
+## Future Improvements
+
+- [ ] Expand vocabulary beyond the current 5 words
+- [ ] Collect a larger, more diverse set of real (non-augmented) examples per word
+- [ ] Add dynamic thresholding to reduce false positives when hands are simply resting
+- [ ] Support two-hand signs (currently single-hand only)
+- [ ] Port the model to TensorFlow Lite for deployment on a Raspberry Pi or other edge device
+- [ ] Evaluate performance across different signers, lighting, and backgrounds
+
+## Connect
+
+Chukwuneta Emmanuel Chidubem
+Aspiring Machine Learning Engineer | emzy45cool@gmail.com
