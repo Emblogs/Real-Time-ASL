@@ -49,15 +49,15 @@ Expanding vocabulary and dataset size is the clear next step (see **Future Impro
 
 ```
 real-time-asl/
-├── phase1_webcam.py              # Webcam capture test (Phase 1)
-├── phase1_hand_landmarks.py      # Webcam + hand landmark overlay (Phase 1)
-├── phase2_extract_from_wlasl.py  # Extracts landmarks from WLASL videos into training data
-├── phase4_live_inference.py      # Live webcam sign recognition (the main app)
-├── requirements.txt
+├── RetrievingWebcam.py           # Webcam capture test (Phase 1)
+├── RetrievingWebcam..py          # Webcam + hand landmark overlay (Phase 1)
+├─  ExtractionOfvalues.py         # Extracts landmarks from WLASL videos into training data
+├── Live_Inference.py             # Live webcam sign recognition (the main app)
+├── Requirements.txt
 ├── hand_landmarker.task          # MediaPipe hand detection model (see setup below)
 ├── asl_model.h5                  # Trained LSTM model (see setup below)
 └── notebooks/
-    └── train_model.ipynb         # Colab notebook: data prep + LSTM training
+    └── Train_Model.ipynb         # Colab notebook: data prep + LSTM training
 ```
 
 ## How to Run Locally
@@ -74,7 +74,7 @@ cd real-time-asl
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r Requirements.txt
 ```
 
 ### 3. Download the required model files
@@ -84,12 +84,12 @@ These aren't included in the repo (kept out via `.gitignore` since they're binar
 - **`hand_landmarker.task`** — MediaPipe's hand detection model. Download from:
   `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task`
   Place it in the project root.
-- **`asl_model.h5`** — the trained sign-classification model. Either train it yourself using `notebooks/train_model.ipynb`, or place your own trained copy in the project root.
+- **`asl_model.h5`** — the trained sign-classification model. Either train it yourself using `notebooks/Train_Model.ipynb`, or place your own trained copy in the project root.
 
 ### 4. Run the live inference app
 
 ```bash
-python phase4_live_inference.py
+python LiveInference.py
 ```
 
 Press **`q`** (with the video window focused) to quit.
