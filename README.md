@@ -49,10 +49,10 @@ Expanding vocabulary and dataset size is the clear next step (see **Future Impro
 
 ```
 real-time-asl/
-├── phase1_webcam.py              # Webcam capture test (Phase 1)
-├── phase1_hand_landmarks.py      # Webcam + hand landmark overlay (Phase 1)
-├── phase2_extract_from_wlasl.py  # Extracts landmarks from WLASL videos into training data
-├── phase4_live_inference.py      # Live webcam sign recognition (the main app)
+├── RetrievingWebcam.py              # Webcam capture test (Phase 1)
+├── RetrievingWebcam.py      # Webcam + hand landmark overlay (Phase 1)
+├── ExtractionOfValues.py  # Extracts landmarks from WLASL videos into training data
+├── LiveInference.py      # Live webcam sign recognition (the main app)
 ├── requirements.txt
 ├── hand_landmarker.task          # MediaPipe hand detection model (see setup below)
 ├── asl_model.h5                  # Trained LSTM model (see setup below)
