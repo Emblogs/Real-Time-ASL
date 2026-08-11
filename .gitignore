@@ -1,0 +1,10 @@
+.venv/
+.kaggle/
+kaggle.json
+*.h5
+wlasl_data/
+MP_Data/
+__pycache__/
+*.pyc
+*.env
+*.zip
