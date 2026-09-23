@@ -7,12 +7,6 @@
 
 > An edge AI pipeline that recognizes American Sign Language (ASL) signs in real time from a webcam feed, using MediaPipe hand tracking and an LSTM neural network.
 
-## Live Demo
-
-<p align="center">
-  <img src="https://via.placeholder.com/800x400.png?text=Live+Webcam+Inference+GIF+Goes+Here" alt="ASL Live Demo">
-</p>
-
 ## Overview
 
 Sign language recognition is a *temporal* problem, not a static image classification one — the same handshape can mean different things depending on how it moves over time. This project bridges **computer vision** (MediaPipe hand landmark tracking) with **sequential deep learning** (an LSTM network) to recognize signs from motion, not single frames.
