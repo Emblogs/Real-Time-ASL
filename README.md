@@ -118,4 +118,4 @@ Rather than recording a small set of self-made webcam clips, this project source
 ## Connect
 
 Chukwuneta Emmanuel Chidubem
-Aspiring Machine Learning Engineer | emzy45cool@gmail.com
+Aspiring Machine Learning Engineer | emmanuelchukwuneta81@gmail.com
